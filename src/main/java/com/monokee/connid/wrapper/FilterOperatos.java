@@ -1,4 +1,4 @@
-package it.athesys.connid.wrapper;
+package com.monokee.connid.wrapper;
 
 public class FilterOperatos {
 

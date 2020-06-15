@@ -14,7 +14,7 @@
  * Copyright 2015 ForgeRock AS.
  */
 
-package it.athesys.connid.wrapper;
+package com.monokee.connid.wrapper;
 
 import java.math.BigDecimal;
 import java.util.Iterator;
@@ -61,20 +61,22 @@ import org.identityconnectors.framework.common.objects.filter.FilterBuilder;
  * UTF8STRING     = UTF-8 string possibly containing white-space
  * </pre>
  *
- * Note that white space, parentheses, and exclamation characters need URL
- * when passed via HTTP query strings.
+ * Note that white space, parentheses, and exclamation characters need URL when
+ * passed via HTTP query strings.
  * <p>
- * ASCII and UTF-8 strings will treat the backslash character as an escape character.
- * For an example, this will allow for the inclusion of quotes or single-quotes within
- * a string that is surrounded by the same type of quotes: "tes\"t".  The backslash
- * character itself will also need to be escaped if it is to be included in the string.
+ * ASCII and UTF-8 strings will treat the backslash character as an escape
+ * character. For an example, this will allow for the inclusion of quotes or
+ * single-quotes within a string that is surrounded by the same type of quotes:
+ * "tes\"t". The backslash character itself will also need to be escaped if it
+ * is to be included in the string.
  * <p>
- * In addition to single valued properties (number, boolean, and string), query filters
- * can be applied to multi-valued properties. When operating on properties that are an
- * array or list type the operation should be evaluated on each element in the array,
- * passing if any of the elements in the array or list pass the operation.
+ * In addition to single valued properties (number, boolean, and string), query
+ * filters can be applied to multi-valued properties. When operating on
+ * properties that are an array or list type the operation should be evaluated
+ * on each element in the array, passing if any of the elements in the array or
+ * list pass the operation.
  *
- * @param  The type of field description used in parsed {@link Filter} objects.
+ * @param The type of field description used in parsed {@link Filter} objects.
  */
 public abstract class FilterParser {
 
@@ -82,8 +84,9 @@ public abstract class FilterParser {
 	private static final int VALUE_OF_MAX_DEPTH = 256;
 
 	/**
-	 * Parses the field description from the current filter token into the type of field
-	 * description the Filter uses.
+	 * Parses the field description from the current filter token into the type of
+	 * field description the Filter uses.
+	 * 
 	 * @param fieldDescription The token from parsing the query string.
 	 * @return The field description.
 	 */
@@ -93,13 +96,11 @@ public abstract class FilterParser {
 	 * Parses the provided string representation of a query filter as a
 	 * {@code Filter}.
 	 *
-	 * @param string
-	 *            The string representation of a query filter .
+	 * @param string The string representation of a query filter .
 	 *
 	 * @return The parsed {@code Filter}.
-	 * @throws IllegalArgumentException
-	 *             If {@code string} is not a valid string representation of a
-	 *             query filter.
+	 * @throws IllegalArgumentException If {@code string} is not a valid string
+	 *                                  representation of a query filter.
 	 */
 	public Filter valueOf(final String string) {
 		// Use recursive descent of grammar described in class Javadoc.
@@ -115,8 +116,7 @@ public abstract class FilterParser {
 	private void checkDepth(final FilterTokenizer tokenizer, final int depth) {
 		if (depth > VALUE_OF_MAX_DEPTH) {
 			throw new IllegalArgumentException("The query filter '" + tokenizer
-					+ "' cannot be parsed because it contains more than " + VALUE_OF_MAX_DEPTH
-					+ " nexted expressions");
+					+ "' cannot be parsed because it contains more than " + VALUE_OF_MAX_DEPTH + " nexted expressions");
 		}
 	}
 
@@ -221,29 +221,28 @@ public abstract class FilterParser {
 			} else {
 				// Must be an integer.
 				MyConnector conn = MyConnector.getInstance();
-				Schema schema =  conn.getFacade().schema();
+				Schema schema = conn.getFacade().schema();
 				ObjectClassInfo oci = schema.findObjectClassInfo(ObjectClass.ACCOUNT_NAME);
-			    
-				Set<AttributeInfo> attributeInfos = oci.getAttributeInfo(); 
-			        String type = oci.getType();
-			        if(ObjectClass.ACCOUNT_NAME.equals(type)) {
-			            for(AttributeInfo info2 : attributeInfos) {
-			                if (info2.getName().contentEquals(pointer)) {
-			                	if (info2.getType() == Integer.class ) {
-			                		assertionValue = Integer.parseInt(nextToken);
-			                	} else if(info2.getType() == Long.class) {
-			                		assertionValue = Long.parseLong(nextToken);
-			                	} else if(info2.getType() == Double.class) {
-			                		assertionValue = Double.parseDouble(nextToken);
-			                	} else if(info2.getType() == BigDecimal.class) {
-			                		assertionValue = new BigDecimal(nextToken);
-			                	}
-			                }
-			            }
-			        }
+
+				Set<AttributeInfo> attributeInfos = oci.getAttributeInfo();
+				String type = oci.getType();
+				if (ObjectClass.ACCOUNT_NAME.equals(type)) {
+					for (AttributeInfo info2 : attributeInfos) {
+						if (info2.getName().contentEquals(pointer)) {
+							if (info2.getType() == Integer.class) {
+								assertionValue = Integer.parseInt(nextToken);
+							} else if (info2.getType() == Long.class) {
+								assertionValue = Long.parseLong(nextToken);
+							} else if (info2.getType() == Double.class) {
+								assertionValue = Double.parseDouble(nextToken);
+							} else if (info2.getType() == BigDecimal.class) {
+								assertionValue = new BigDecimal(nextToken);
+							}
+						}
+					}
 				}
-			
-			
+			}
+
 			try {
 				Filter fi = comparisonFilter(pointer, operator, assertionValue);
 				System.out.println("FILTRO " + fi.toString());
@@ -257,39 +256,36 @@ public abstract class FilterParser {
 
 	/**
 	 * Creates a new generic comparison filter using the provided field name,
-	 * operator, and value assertion. When the provided operator name represents
-	 * a core operator, e.g. "eq", then this method is equivalent to calling the
+	 * operator, and value assertion. When the provided operator name represents a
+	 * core operator, e.g. "eq", then this method is equivalent to calling the
 	 * equivalent constructor, e.g. {@link Filter#equalTo(Object, Object)}.
-	 * Otherwise, when the operator name does not correspond to a core operator,
-	 * an extended comparison filter will be returned.
+	 * Otherwise, when the operator name does not correspond to a core operator, an
+	 * extended comparison filter will be returned.
 	 *
-	 * @param field
-	 *            The name of field to be compared.
-	 * @param operator
-	 *            The operator to use for the comparison, which must be one of
-	 *            the core operator names, or a string matching the regular
-	 *            expression {@code [a-zA-Z_0-9.]+}.
-	 * @param valueAssertion
-	 *            The assertion value.
+	 * @param field          The name of field to be compared.
+	 * @param operator       The operator to use for the comparison, which must be
+	 *                       one of the core operator names, or a string matching
+	 *                       the regular expression {@code [a-zA-Z_0-9.]+}.
+	 * @param valueAssertion The assertion value.
 	 * @return The newly created generic comparison filter.
-	 * @throws IllegalArgumentException
-	 *             If {@code operator} is not a valid operator name.
+	 * @throws IllegalArgumentException If {@code operator} is not a valid operator
+	 *                                  name.
 	 */
 	private Filter comparisonFilter(final String field, final String operator, final Object valueAssertion) {
 		if (operator.equalsIgnoreCase(FilterOperatos.EQUALS)) {
-			return FilterBuilder.equalTo(AttributeBuilder.build((String)field,  valueAssertion));
+			return FilterBuilder.equalTo(AttributeBuilder.build((String) field, valueAssertion));
 		} else if (operator.equalsIgnoreCase(FilterOperatos.GREATER_THAN)) {
-			return FilterBuilder.greaterThan(AttributeBuilder.build((String)field, valueAssertion));
+			return FilterBuilder.greaterThan(AttributeBuilder.build((String) field, valueAssertion));
 		} else if (operator.equalsIgnoreCase(FilterOperatos.GREATER_EQUAL)) {
-			return FilterBuilder.greaterThanOrEqualTo(AttributeBuilder.build((String)field, valueAssertion));
+			return FilterBuilder.greaterThanOrEqualTo(AttributeBuilder.build((String) field, valueAssertion));
 		} else if (operator.equalsIgnoreCase(FilterOperatos.LESS_THAN)) {
-			return FilterBuilder.lessThan(AttributeBuilder.build((String)field, valueAssertion));
+			return FilterBuilder.lessThan(AttributeBuilder.build((String) field, valueAssertion));
 		} else if (operator.equalsIgnoreCase(FilterOperatos.LESS_EQUAL)) {
-			return FilterBuilder.lessThanOrEqualTo(AttributeBuilder.build((String)field, valueAssertion));
+			return FilterBuilder.lessThanOrEqualTo(AttributeBuilder.build((String) field, valueAssertion));
 		} else if (operator.equalsIgnoreCase(FilterOperatos.CONTAINS)) {
-			return FilterBuilder.contains(AttributeBuilder.build((String)field, valueAssertion));
+			return FilterBuilder.contains(AttributeBuilder.build((String) field, valueAssertion));
 		} else if (operator.equalsIgnoreCase(FilterOperatos.STARTS_WITH)) {
-			return FilterBuilder.startsWith(AttributeBuilder.build((String)field, valueAssertion));
+			return FilterBuilder.startsWith(AttributeBuilder.build((String) field, valueAssertion));
 		} else {
 			throw new IllegalArgumentException("\"" + operator + "\" is not a valid filter operator");
 		}
@@ -341,59 +337,60 @@ public abstract class FilterParser {
 
 		private void readNextToken() {
 			switch (state) {
-			case NEED_START_STRING:
-				final int stringStart = pos;
-				for (; pos < filterString.length() && filterString.charAt(pos) != stringDelimiter; pos++) {
-					if (filterString.charAt(pos) == '\\') {
-						if ((pos + 1) == filterString.length()) {
-							throw new IllegalArgumentException("The filter string cannot end with an escape character");
-						}
-						// Found an escaped character, so remove the '\')
-						filterString = new StringBuilder(filterString).deleteCharAt(pos).toString();
-					}
-					// Do nothing
-				}
-				nextToken = filterString.substring(stringStart, pos);
-				state = NEED_END_STRING;
-				break;
-			case NEED_END_STRING:
-				// NEED_START_STRING guarantees that we are either at the end of the string
-				// or the next character is a quote.
-				if (pos < filterString.length()) {
-					nextToken = filterString.substring(pos, ++pos);
-				} else {
-					nextToken = null;
-				}
-				state = NEED_TOKEN;
-				break;
-			default: // NEED_TOKEN:
-				if (!skipWhiteSpace()) {
-					nextToken = null;
-				} else {
-					final int tokenStart = pos;
-					switch (filterString.charAt(pos++)) {
-					case '(':
-					case ')':
-						break;
-					case '"':
-						state = NEED_START_STRING;
-						stringDelimiter = '"';
-						break;
-					case '\'':
-						state = NEED_START_STRING;
-						stringDelimiter = '\'';
-						break;
-					default:
-						for (; pos < filterString.length(); pos++) {
-							final char c = filterString.charAt(pos);
-							if (c == '(' || c == ')' || c == ' ') {
-								break;
+				case NEED_START_STRING:
+					final int stringStart = pos;
+					for (; pos < filterString.length() && filterString.charAt(pos) != stringDelimiter; pos++) {
+						if (filterString.charAt(pos) == '\\') {
+							if ((pos + 1) == filterString.length()) {
+								throw new IllegalArgumentException(
+										"The filter string cannot end with an escape character");
 							}
+							// Found an escaped character, so remove the '\')
+							filterString = new StringBuilder(filterString).deleteCharAt(pos).toString();
 						}
-						break;
+						// Do nothing
 					}
-					nextToken = filterString.substring(tokenStart, pos);
-				}
+					nextToken = filterString.substring(stringStart, pos);
+					state = NEED_END_STRING;
+					break;
+				case NEED_END_STRING:
+					// NEED_START_STRING guarantees that we are either at the end of the string
+					// or the next character is a quote.
+					if (pos < filterString.length()) {
+						nextToken = filterString.substring(pos, ++pos);
+					} else {
+						nextToken = null;
+					}
+					state = NEED_TOKEN;
+					break;
+				default: // NEED_TOKEN:
+					if (!skipWhiteSpace()) {
+						nextToken = null;
+					} else {
+						final int tokenStart = pos;
+						switch (filterString.charAt(pos++)) {
+							case '(':
+							case ')':
+								break;
+							case '"':
+								state = NEED_START_STRING;
+								stringDelimiter = '"';
+								break;
+							case '\'':
+								state = NEED_START_STRING;
+								stringDelimiter = '\'';
+								break;
+							default:
+								for (; pos < filterString.length(); pos++) {
+									final char c = filterString.charAt(pos);
+									if (c == '(' || c == ')' || c == ' ') {
+										break;
+									}
+								}
+								break;
+						}
+						nextToken = filterString.substring(tokenStart, pos);
+					}
 			}
 		}
 

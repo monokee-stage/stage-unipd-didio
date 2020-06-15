@@ -1,4 +1,4 @@
-package it.athesys.connid.wrapper;
+package com.monokee.connid.wrapper;
 
 import java.util.ArrayList;
 import java.util.List;
