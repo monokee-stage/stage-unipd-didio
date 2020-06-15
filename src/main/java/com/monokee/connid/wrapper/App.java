@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -51,86 +52,70 @@ public class App
     {
     	
     	try {
-    				/*
-					ConnectorInfoManagerFactory fact = ConnectorInfoManagerFactory.getInstance();
-					File bundleDirectory = new File("C:\\Users\\pdidi\\.m2\\repository\\net\\tirasa\\connid\\bundles\\db\\net.tirasa.connid.bundles.db.table\\2.2.6");       
-					URL url = IOUtil.makeURL(bundleDirectory, "net.tirasa.connid.bundles.db.table-2.2.6.jar");       
-
-					ConnectorInfoManager manager = fact.getLocalManager(url);
-					ConnectorKey key = new ConnectorKey("net.tirasa.connid.bundles.db.table", "2.2.6", "net.tirasa.connid.bundles.db.table.DatabaseTableConnector");
-
-
-					ConnectorInfo info = manager.findConnectorInfo(key);
-
-
-					// From the ConnectorInfo object, create the default APIConfiguration.
-					APIConfiguration apiConfig = info.createDefaultAPIConfiguration();
-
-					// From the default APIConfiguration, retrieve the ConfigurationProperties.
-					ConfigurationProperties properties = apiConfig.getConfigurationProperties();
-
-					// Print out what the properties are (not necessary)
-					List<String> propertyNames = properties.getPropertyNames();
-					for(String propName : propertyNames) {
-						ConfigurationProperty prop = properties.getProperty(propName);
-						//System.out.println("Property Name: " + prop.getName() + "\tProperty Type: " + prop.getType());
-					}
-
-					//works
-					String host = "127.0.0.1";
-					properties.setPropertyValue("host", host);
-					String port = "3306";
-					properties.setPropertyValue("port", port);
-					String user = "root";
-					properties.setPropertyValue("user", user);
-					GuardedString password = new GuardedString("root".toCharArray());
-					properties.setPropertyValue("password", password);
-					String database = "monokee";
-					properties.setPropertyValue("database", database);
-					String table = "accounts";
-					properties.setPropertyValue("table", table);
-					String keyColumn = "accountId";
-					properties.setPropertyValue("keyColumn", keyColumn);
-					String driver = "com.mysql.cj.jdbc.Driver";
-					properties.setPropertyValue("jdbcDriver", driver);
-					String urltemplate = "jdbc:mysql://%h:%p/%d";
-					properties.setPropertyValue("jdbcUrlTemplate", urltemplate);
-					String passwordCharset = "UTF-8";
-					properties.setPropertyValue("passwordCharset", passwordCharset);
-					
-					//properties.setPropertyValue(name, value);
-					// Use the ConnectorFacadeFactory's newInstance() method to get a new connector.
-					ConnectorFacade conn = ConnectorFacadeFactory.getInstance().newInstance(apiConfig);
-
-					// Make sure we have set up the Configuration properly
-					conn.validate(); 
-					*/
-    		
-    				MyConnector conn = MyConnector.getInstance();
     				
-    				conn.setFile("C:\\Users\\pdidi\\.m2\\repository\\net\\tirasa\\connid\\bundles\\db\\net.tirasa.connid.bundles.db.table\\2.2.6");
+    				MyConnector conn = new MyConnector();
+    				
+    				//mySQL example
+    				conn.setBundleDirectory("C:\\Users\\pdidi\\.m2\\repository\\net\\tirasa\\connid\\bundles\\db\\net.tirasa.connid.bundles.db.table\\2.2.6");
     				conn.setJar("net.tirasa.connid.bundles.db.table-2.2.6.jar");
     				conn.setBundle("net.tirasa.connid.bundles.db.table");
     				conn.setVersion("2.2.6");
     				conn.setConnidType("net.tirasa.connid.bundles.db.table.DatabaseTableConnector");
-    				conn.setHost("127.0.0.1");
-    				conn.setPort("3306");
-    				conn.setUser("root");
-    				conn.setPassword("root");
-    				conn.setDatabase("monokee");
-    				conn.setTable("accounts");
-    				conn.setKeyColumn("accountId");
-    				conn.setDriver("com.mysql.cj.jdbc.Driver");
-    				conn.setUrlTemplate("jdbc:mysql://%h:%p/%d");
-    				conn.setPasswordCharset("UTF-8");
     				
-    				conn.setConnector();
+    				HashMap<String, Object> properties = new HashMap<String, Object>();
+    				properties.put("host", "127.0.0.1");
+    				properties.put("port", "3306");
+    				properties.put("user", "root");
+    				properties.put("password", new GuardedString("root".toCharArray()));
+    				properties.put("database", "monokee");
+    				properties.put("table", "accounts");
+    				properties.put("keyColumn", "accountId");
+    				properties.put("jdbcDriver", "com.mysql.cj.jdbc.Driver");
+    				properties.put("jdbcUrlTemplate", "jdbc:mysql://%h:%p/%d");
+    				properties.put("passwordCharset", "UTF-8");
+    				
+    				
+    				/*
+    				//LDAP example
+    				conn.setBundleDirectory("C:\\Users\\pdidi\\.m2\\repository\\net\\tirasa\\connid\\bundles\\net.tirasa.connid.bundles.ldap\\1.5.4");
+    				conn.setJar("net.tirasa.connid.bundles.ldap-1.5.4.jar");
+    				conn.setBundle("net.tirasa.connid.bundles.ldap");
+    				conn.setVersion("1.5.4");
+    				conn.setConnidType("net.tirasa.connid.bundles.ldap.LdapConnector");
+    				
+    				HashMap<String, Object> properties = new HashMap<String, Object>();
+    				properties.put("host", "localhost");
+    				properties.put("port", 389);
+    				properties.put("principal","cn=Manager,dc=my-domain,dc=com");
+    				properties.put("credentials", new GuardedString("sudo".toCharArray()));
+    				properties.put("baseContexts", new String[] {"dc=my-domain,dc=com"});
+    				properties.put("readSchema", true);
+    				//properties.put("accountObjectClasses", new String[] {"top","person","organizationalPerson","posixAccount","shadowAccount","inetOrgPerson"});
+    				properties.put("accountObjectClasses", new String[] {"top","person","organizationalPerson","inetOrgPerson"});
+    				*/
+    				
+    				//pass all the connection parameters in a Map<String,Object>
+    				conn.setConnector(properties);
+    				
+    				//check if the connection is properly set
     				conn.validate();
     				
-			    	String a6 = "salary gt 2000.00";
-			    	String a10 = "department eq \"Product Development\" and age gt 36 or age eq 35";
+    				//create some queries (need to be parsed)
+			    	String sql6 = "salary gt 2000.00";
+			    	String sql10 = "department eq \"Product Development\" and age gt 36 or age eq 35";
+			    	String ldap1 = "homeDirectory eq \"/home/hacker\"";
+			    	String ldap2= "uidNumber gt \"100\"";
+			    	String ldap3= "ou eq \"People\"";
+			    	String ldap4= "uidNumber gt \"100\" and homeDirectory eq \"/home/hacker\" and uidNumber lt \"6666\"";
+			    	String ldap5= "sn eq \"Zetts\""; //sn no result or givenName
+			    	String ldap6= "employeeType eq \"Employee\""; //multiple results
+			    	String ldap7= "cn eq \"Pen Radko\""; //Radko
+			    	String ldap8= "cn eq \"Marco Boldo\"";// Boldo
+			    	String ldap9= "sn eq \"Boldo\"";// Boldo
+			    	String ldap10= "gidNumber eq \"10037\"";// Boldo
 			    	
-			    	FilterParser parser = new FilterParser() {
+			    	//initializing a parser (with relative connector)
+			    	FilterParser parser = new FilterParser(conn) {
 			            @Override
 			            protected String parseField(String fieldDescription) {
 			            	System.out.println(fieldDescription);
@@ -138,9 +123,11 @@ public class App
 			            }
 			        };
 			        
-			        //Filter a7 = parser.valueOf(a6);
-			        Filter a11= parser.valueOf(a10);
+			        // parsing the query
+			        Filter query= parser.valueOf(sql10);
 			        
+			        
+			        //result handler to pass to the search query 
 			        final List<ConnectorObject> res = new ArrayList<ConnectorObject>();
 			        ResultsHandler hand = new ResultsHandler() {
 				        public boolean handle(ConnectorObject obj) {
@@ -149,12 +136,35 @@ public class App
 				        } 
 				    };
 				    
-				    System.out.println("yyyyyyyyyyyyyyyyyyyyyyyyyyyyy");
-			         conn.getFacade().search(ObjectClass.ACCOUNT, a11, hand, null);
+				    //alternatively, use CustomHandler (LDAP only)
+				    //CustomHandler myhand = new CustomHandler();
+				    
+				    //search
+			         conn.getFacade().search(ObjectClass.ACCOUNT, query, hand, null);
+			        
+			         
+			         //print result, if any  w/ ResultHandler
+			        if(res.isEmpty()) {System.out.println("The query has no result");}
 				    for(ConnectorObject obj : res ) {
 				        System.out.println("Name: " + obj.getName() + "\tUID: " + obj.getUid());
 				    } 
-				    System.out.println("yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy");
+				    
+			         
+			         //print with CustomHandler (LDAP Only)
+				    //myhand.printObjects();
+				    
+				    /*
+				    //update
+				    //works
+			         Set<Attribute> toUpdate = new HashSet<Attribute>();
+				     toUpdate.add(AttributeBuilder.build("gidNumber", "11111"));
+				    conn.getFacade().update(ObjectClass.ACCOUNT, new Uid("43f79794-8ad1-4cd8-b864-223fe3040d09"), toUpdate, new OperationOptionsBuilder().build());
+			         */
+				   
+				    //delete
+				    //works
+				    //conn.getFacade().delete(ObjectClass.ACCOUNT, new Uid("3801d6fd-401c-4241-b6ce-7f682e996b3f"), new OperationOptionsBuilder().build());
+				    
 		
     } catch (Exception e) {
 		e.printStackTrace();

@@ -91,7 +91,11 @@ public abstract class FilterParser {
 	 * @return The field description.
 	 */
 	protected abstract String parseField(String fieldDescription);
-
+	
+	private MyConnector conn;
+	public FilterParser(MyConnector connector) {
+		conn = connector;
+	}
 	/**
 	 * Parses the provided string representation of a query filter as a
 	 * {@code Filter}.
@@ -219,8 +223,7 @@ public abstract class FilterParser {
 					return valueOfIllegalArgument(tokenizer);
 				}
 			} else {
-				// Must be an integer.
-				MyConnector conn = MyConnector.getInstance();
+				// must be a number
 				Schema schema = conn.getFacade().schema();
 				ObjectClassInfo oci = schema.findObjectClassInfo(ObjectClass.ACCOUNT_NAME);
 
@@ -229,12 +232,16 @@ public abstract class FilterParser {
 				if (ObjectClass.ACCOUNT_NAME.equals(type)) {
 					for (AttributeInfo info2 : attributeInfos) {
 						if (info2.getName().contentEquals(pointer)) {
+							//if it's an Integer, parse Integer
 							if (info2.getType() == Integer.class) {
 								assertionValue = Integer.parseInt(nextToken);
+								//if it's a Long, parse Long
 							} else if (info2.getType() == Long.class) {
 								assertionValue = Long.parseLong(nextToken);
+								//if it's an Double, parse Double
 							} else if (info2.getType() == Double.class) {
 								assertionValue = Double.parseDouble(nextToken);
+								//if it's an BigDecimal, parse BigDecimal
 							} else if (info2.getType() == BigDecimal.class) {
 								assertionValue = new BigDecimal(nextToken);
 							}
